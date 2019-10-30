@@ -4,6 +4,9 @@ target/
 !**/src/main/**
 !**/src/test/**
 
+### demo ###
+multiple-rpc-demo
+
 ### STS ###
 .apt_generated
 .classpath
