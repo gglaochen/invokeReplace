@@ -14,23 +14,14 @@
         <module>multiple-rpc-dependencies</module>
     </modules>
 
-    <properties>
-        <!-- Environment Settings -->
-        <java.version>1.8</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <!-- Spring Settings -->
-        <spring-cloud.version>Greenwich.SR1</spring-cloud.version>
-        <spring-cloud-alibaba.version>2.1.0.RELEASE</spring-cloud-alibaba.version>
-    </properties>
-
    <dependencyManagement>
        <dependencies>
            <dependency>
                <groupId>com.feign.dubbo.example</groupId>
                <artifactId>dependencies</artifactId>
-               <version>0.0.1-SNAPSHOT</version>
+               <version>${project.version}</version>
+               <type>pom</type>
+               <scope>import</scope>
            </dependency>
        </dependencies>
    </dependencyManagement>
