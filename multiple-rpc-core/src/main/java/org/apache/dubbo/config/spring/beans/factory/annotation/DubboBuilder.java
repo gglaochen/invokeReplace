@@ -1,4 +1,4 @@
-package com.feign.dubbo.example.core.context;
+package org.apache.dubbo.config.spring.beans.factory.annotation;
 
 import feign.Feign;
 import org.springframework.stereotype.Component;

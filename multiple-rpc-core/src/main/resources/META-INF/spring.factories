@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.feign.dubbo.example.core.ImportDubboAutoConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.feign.dubbo.example.core.context.ImportDubboAutoConfiguration
