@@ -1,9 +1,10 @@
 package org.apache.dubbo.config.spring.beans.factory.annotation;
 
-import com.alibaba.dubbo.config.annotation.Service;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.common.utils.CollectionUtils;
+import org.apache.dubbo.config.annotation.Service;
 import org.apache.dubbo.config.spring.ServiceBean;
 import org.apache.dubbo.config.spring.context.annotation.DubboClassPathBeanDefinitionScanner;
 import org.apache.dubbo.config.spring.util.ObjectUtils;
@@ -100,8 +101,6 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
             beanDefinitionHolders.forEach(beanDefinitionHolder -> registerServiceBean(beanDefinitionHolder, registry, scanner));
         }
 
-        return;
-
     }
 
     private void registerServiceBean(BeanDefinitionHolder beanDefinitionHolder, BeanDefinitionRegistry registry, DubboClassPathBeanDefinitionScanner scanner) {
@@ -123,20 +122,23 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
 
     private String generatorBeanName(Service service, Class<?> interfaceClass, String annotatedServiceBeanName) {
         StringBuilder beanNameBuilder = new StringBuilder(ServiceBean.class.getSimpleName());
+
         beanNameBuilder.append(SEPARATOR).append(annotatedServiceBeanName);
 
         beanNameBuilder.append(SEPARATOR).append(interfaceClass.getName());
 
-        String version = service.version();
+        if (null != service) {
+            String version = service.version();
 
-        if (StringUtils.hasText(version)) {
-            beanNameBuilder.append(SEPARATOR).append(version);
-        }
+            if (StringUtils.hasText(version)) {
+                beanNameBuilder.append(SEPARATOR).append(version);
+            }
 
-        String group = service.group();
+            String group = service.group();
 
-        if (StringUtils.hasText(group)) {
-            beanNameBuilder.append(SEPARATOR).append(group);
+            if (StringUtils.hasText(group)) {
+                beanNameBuilder.append(SEPARATOR).append(group);
+            }
         }
 
         return beanNameBuilder.toString();
@@ -153,9 +155,9 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
 
         propertyValues.addPropertyValues(new AnnotationPropertyValuesAdapter(service, environment, ignoreAttributeNames));
 
-        builder.addPropertyReference("ref", environment.resolvePlaceholders(annotatedServiceBeanName));
-
-        builder.addPropertyValue("interface", interfaceClass.getName());
+        if (StringUtils.hasText(annotatedServiceBeanName)) {
+            builder.addPropertyReference("ref", environment.resolvePlaceholders(annotatedServiceBeanName));
+        }
 
         if (null != service) {
             if (StringUtils.hasText(service.provider())) {
@@ -260,7 +262,7 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
 
     private Set<String> reslovePlaceholders(Set<String> basePackages) {
         final Set<String> fullPathPkgs = new LinkedHashSet<String>(basePackages.size());
-        basePackages.stream().filter(StringUtils::hasText).forEach(pkg -> fullPathPkgs.add(environment.getProperty(pkg, String.class)));
+        basePackages.stream().filter(StringUtils::hasText).forEach(pkg -> fullPathPkgs.add(environment.resolvePlaceholders(pkg.trim())));
         return fullPathPkgs;
     }
 

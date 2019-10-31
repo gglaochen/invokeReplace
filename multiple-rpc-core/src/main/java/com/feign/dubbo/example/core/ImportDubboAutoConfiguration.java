@@ -1,7 +1,7 @@
 package com.feign.dubbo.example.core;
 
-import org.apache.dubbo.config.spring.beans.factory.annotation.FeignClient2DubboPostProcessor;
 import org.apache.dubbo.config.AbstractConfig;
+import org.apache.dubbo.config.spring.beans.factory.annotation.FeignClient2DubboPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;

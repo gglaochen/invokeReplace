@@ -29,6 +29,7 @@
         <java.version>1.8</java.version>
         <dubbo.version>2.7.4.1</dubbo.version>
         <dubbo.starter.version>2.7.3</dubbo.starter.version>
+        <dubbo.register.nacos.version>2.7.3</dubbo.register.nacos.version>
     </properties>
 
     <dependencies>
@@ -41,6 +42,11 @@
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo-spring-boot-starter</artifactId>
             <version>${dubbo.starter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-registry-nacos</artifactId>
+            <version>${dubbo.register.nacos.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
