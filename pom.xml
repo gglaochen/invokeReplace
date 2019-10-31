@@ -12,6 +12,7 @@
         <module>multiple-rpc-starter</module>
         <module>multiple-rpc-core</module>
         <module>multiple-rpc-dependencies</module>
+        <module>multiple-rpc-nacos</module>
     </modules>
 
    <dependencyManagement>

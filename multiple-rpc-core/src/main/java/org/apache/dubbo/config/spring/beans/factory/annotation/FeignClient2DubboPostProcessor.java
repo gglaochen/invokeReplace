@@ -1,19 +1,17 @@
 package org.apache.dubbo.config.spring.beans.factory.annotation;
 
-import com.alibaba.dubbo.config.annotation.Service;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.common.utils.CollectionUtils;
+import org.apache.dubbo.config.annotation.Service;
 import org.apache.dubbo.config.spring.ServiceBean;
 import org.apache.dubbo.config.spring.context.annotation.DubboClassPathBeanDefinitionScanner;
 import org.apache.dubbo.config.spring.util.ObjectUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanClassLoaderAware;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.SingletonBeanRegistry;
+import org.springframework.beans.factory.config.*;
 import org.springframework.beans.factory.support.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -29,6 +27,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.StringUtils;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -53,12 +52,15 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
 
     private ClassLoader classLoader;
 
+    private static final String SEPARATOR = ":";
+
     public FeignClient2DubboPostProcessor(Set<String> basePackages) {
         this.basePackages = basePackages;
     }
 
     /**
      * 在应用初始化之后，修改上下文中的内部bean定义。这一步骤处于所有的常规bean初始化之后，且尚未被实例之前，这一阶段允许添加一些bean定义
+     *
      * @param registry 上下文中使用的bean定义的注册表
      * @throws BeansException 错误情况下会抛出异常
      */
@@ -74,8 +76,9 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
 
     /**
      * 注册被{@link org.springframework.cloud.openfeign.FeignClient}标注的Bean
+     *
      * @param fullPathPkgs 扫描包全路径
-     * @param registry 上下文中使用的bean定义注册表
+     * @param registry     上下文中使用的bean定义注册表
      */
     private void registerServiceBeans(Set<String> fullPathPkgs, BeanDefinitionRegistry registry) {
 
@@ -98,8 +101,6 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
             beanDefinitionHolders.forEach(beanDefinitionHolder -> registerServiceBean(beanDefinitionHolder, registry, scanner));
         }
 
-        return;
-
     }
 
     private void registerServiceBean(BeanDefinitionHolder beanDefinitionHolder, BeanDefinitionRegistry registry, DubboClassPathBeanDefinitionScanner scanner) {
@@ -111,6 +112,36 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
         String annotatedServiceBeanName = beanDefinitionHolder.getBeanName();
 
         AbstractBeanDefinition beanDefinition = buildServiceBeanDefine(service, interfaceClass, annotatedServiceBeanName);
+
+        String beanName = generatorBeanName(service, interfaceClass, annotatedServiceBeanName);
+
+        if (scanner.checkCandidate(beanName, beanDefinition)) {
+            registry.registerBeanDefinition(beanName, beanDefinition);
+        }
+    }
+
+    private String generatorBeanName(Service service, Class<?> interfaceClass, String annotatedServiceBeanName) {
+        StringBuilder beanNameBuilder = new StringBuilder(ServiceBean.class.getSimpleName());
+
+        beanNameBuilder.append(SEPARATOR).append(annotatedServiceBeanName);
+
+        beanNameBuilder.append(SEPARATOR).append(interfaceClass.getName());
+
+        if (null != service) {
+            String version = service.version();
+
+            if (StringUtils.hasText(version)) {
+                beanNameBuilder.append(SEPARATOR).append(version);
+            }
+
+            String group = service.group();
+
+            if (StringUtils.hasText(group)) {
+                beanNameBuilder.append(SEPARATOR).append(group);
+            }
+        }
+
+        return beanNameBuilder.toString();
     }
 
     private AbstractBeanDefinition buildServiceBeanDefine(Service service, Class<?> interfaceClass, String annotatedServiceBeanName) {
@@ -124,9 +155,9 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
 
         propertyValues.addPropertyValues(new AnnotationPropertyValuesAdapter(service, environment, ignoreAttributeNames));
 
-        builder.addPropertyReference("ref", environment.resolvePlaceholders(annotatedServiceBeanName));
-
-        builder.addPropertyValue("interface", interfaceClass.getName());
+        if (StringUtils.hasText(annotatedServiceBeanName)) {
+            builder.addPropertyReference("ref", environment.resolvePlaceholders(annotatedServiceBeanName));
+        }
 
         if (null != service) {
             if (StringUtils.hasText(service.provider())) {
@@ -145,9 +176,35 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
                 builder.addPropertyValue("module", service.module());
             }
 
+            String[] registry = service.registry();
+            List<RuntimeBeanReference> registerRuntimeBeanReferences = toRuntimeBeanReference(registry);
+
+            if (CollectionUtils.isNotEmpty(registerRuntimeBeanReferences)) {
+                builder.addPropertyValue("registries", registerRuntimeBeanReferences);
+            }
+
+            String[] protocol = service.protocol();
+            List<RuntimeBeanReference> protocolRuntimeBeanReference = toRuntimeBeanReference(protocol);
+
+            if (CollectionUtils.isNotEmpty(protocolRuntimeBeanReference)) {
+                builder.addPropertyValue("protocols", protocolRuntimeBeanReference);
+            }
+
         }
 
-        return null;
+        return builder.getBeanDefinition();
+    }
+
+    private List<RuntimeBeanReference> toRuntimeBeanReference(String[] registry) {
+        List<RuntimeBeanReference> runtimeBeanReferences = new ManagedList<>();
+
+        if (!org.springframework.util.ObjectUtils.isEmpty(registry)) {
+            for (String re : registry) {
+                runtimeBeanReferences.add(new RuntimeBeanReference(environment.resolvePlaceholders(re)));
+            }
+        }
+
+        return runtimeBeanReferences;
     }
 
     private Class<?> resolveServiceInterfaceClass(Class<?> beanClass, Service service) {
@@ -205,12 +262,13 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
 
     private Set<String> reslovePlaceholders(Set<String> basePackages) {
         final Set<String> fullPathPkgs = new LinkedHashSet<String>(basePackages.size());
-        basePackages.stream().filter(StringUtils::hasText).forEach(pkg -> fullPathPkgs.add(environment.getProperty(pkg, String.class)));
+        basePackages.stream().filter(StringUtils::hasText).forEach(pkg -> fullPathPkgs.add(environment.resolvePlaceholders(pkg.trim())));
         return fullPathPkgs;
     }
 
     /**
      * 在应用初始化之后，修改上下文中的内部bean定义。允许修改或添加尚未初始化bean的属性
+     *
      * @param beanFactory application context中使用的bean factory
      * @throws BeansException 错误情况下会抛出异常
      */

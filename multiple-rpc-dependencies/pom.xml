@@ -22,6 +22,12 @@
 
         <!--lombok-->
         <lombok.version>1.18.10</lombok.version>
+
+        <!--alibaba spring context-->
+        <alibaba.spring.context.version>1.0.1</alibaba.spring.context.version>
+
+        <!--netty all version-->
+        <netty.all.version>4.1.42.Final</netty.all.version>
     </properties>
 
     <dependencyManagement>
@@ -33,11 +39,25 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.spring</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>${alibaba.spring.context.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Commons -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.all.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
