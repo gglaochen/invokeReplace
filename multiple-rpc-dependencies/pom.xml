@@ -28,6 +28,9 @@
 
         <!--netty all version-->
         <netty.all.version>4.1.42.Final</netty.all.version>
+
+        <!--openfeign start version-->
+        <openfeign.starter.version>2.1.1.RELEASE</openfeign.starter.version>
     </properties>
 
     <dependencyManagement>
@@ -40,7 +43,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-starter-openfeign</artifactId>
-                <version>2.1.1.RELEASE</version>
+                <version>${openfeign.starter.version}</version>
             </dependency>
 
             <dependency>

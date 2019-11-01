@@ -5,7 +5,7 @@ target/
 !**/src/test/**
 
 ### demo ###
-multiple-rpc-demo
+### multiple-rpc-demo ###
 
 ### STS ###
 .apt_generated
