@@ -159,6 +159,10 @@ public class FeignClient2DubboPostProcessor implements BeanDefinitionRegistryPos
             builder.addPropertyReference("ref", environment.resolvePlaceholders(annotatedServiceBeanName));
         }
 
+        if (StringUtils.hasText(interfaceClass.getName())) {
+            builder.addPropertyValue("interface", interfaceClass.getName());
+        }
+
         if (null != service) {
             if (StringUtils.hasText(service.provider())) {
                 builder.addPropertyValue("provider", service.provider());

@@ -3,17 +3,17 @@ package org.apache.dubbo.config.spring.beans.factory.annotation;
 import feign.Feign;
 import feign.Target;
 import org.apache.dubbo.config.annotation.Reference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
 import static org.apache.dubbo.config.spring.util.AnnotationUtils.getAttributes;
 import static org.springframework.core.annotation.AnnotationAttributes.fromMap;
 
-@Component
 public class DubboBuilder extends Feign.Builder {
 
-    private final ApplicationContext applicationContext;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private Reference defaultReference;
 
@@ -22,10 +22,9 @@ public class DubboBuilder extends Feign.Builder {
         String field;
     }
 
-    public DubboBuilder(ApplicationContext applicationContext) {
+    public DubboBuilder() {
         // 产生@Reference 默认配置实例
         this.defaultReference = ReflectionUtils.findField(DubboBuilder.DefaultReferenceClass.class, "field").getAnnotation(Reference.class);
-        this.applicationContext = applicationContext;
     }
 
 
