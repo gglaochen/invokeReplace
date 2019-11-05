@@ -1,4 +1,4 @@
-# Multiple-RPC-DEMO
+# Multiple-RPC
 
 在Spring cloud alibaba的基础上，以Nacos为注册中心，提供了两种服务调用方式，默认方式为 Feign，导入Dubbo包之后会使用Dubbo调用
 
