@@ -9,7 +9,6 @@
 
 ## 项目依赖
 
-- Spring cloud Greenwich.SR1
 - Spring boot 2.1.8.RELEASE
 - Spring cloud alibaba 2.1.0.RELEASE
 - Spring cloud alibaba nacos starter 0.9.0.RELEASE
